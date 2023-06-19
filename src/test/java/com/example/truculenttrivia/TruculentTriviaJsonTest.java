@@ -68,7 +68,7 @@ public class TruculentTriviaJsonTest {
                 new String[] { "Florida", "Idaho", "New Mexico" });
 
         assertThat(json.parseObject(expected).correct_answer()).isEqualTo(expectedData.correct_answer());
-        //assertThat(Arrays.equals(json.parseObject(expected).incorrectAnswers(), expectedData.incorrectAnswers()));
+        assertThat(json.parseObject(expected).incorrect_answers()).containsExactly(expectedData.incorrect_answers());
 
     }
 }
