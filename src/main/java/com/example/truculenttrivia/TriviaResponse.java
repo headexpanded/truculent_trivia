@@ -1,7 +1,7 @@
 package com.example.truculenttrivia;
 
 public record TriviaResponse(
-    int responseCode,
+    int response_code,
     TriviaData[] results
 ) {
     
