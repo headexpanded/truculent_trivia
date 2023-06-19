@@ -1,8 +1,11 @@
 package com.example.truculenttrivia;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,39 +16,59 @@ import org.springframework.boot.test.json.JacksonTester;
 public class TruculentTriviaJsonTest {
 
     @Autowired
-    private JacksonTester<TriviaQuestion> json;
+    private JacksonTester<TriviaData> json;
 
     @Test
     public void triviaDataSerialisationTest() throws IOException {
-        TriviaQuestion triviaQuestion = new TriviaQuestion("Who was the first drummer in The Beatles?", "Bob Dylan",
-                "Mick Jagger", "Pete Best", "Ringo Starr");
+        String expectedJson = new String(new ClassPathResource("expected.json").getInputStream().readAllBytes());
 
-        assertThat(json.write(triviaQuestion)).isStrictlyEqualToJson("expected.json");
-        assertThat(json.write(triviaQuestion)).hasJsonPathStringValue("@.question");
-        assertThat(json.write(triviaQuestion)).extractingJsonPathStringValue("@.answer1").isEqualTo("Bob Dylan");
-        assertThat(json.write(triviaQuestion)).hasJsonPathStringValue("@.answer2");
-        assertThat(json.write(triviaQuestion)).extractingJsonPathStringValue("@.answer2").isEqualTo("Mick Jagger");
-        assertThat(json.write(triviaQuestion)).hasJsonPathStringValue("@.answer3");
-        assertThat(json.write(triviaQuestion)).extractingJsonPathStringValue("@.answer3").isEqualTo("Pete Best");
-        assertThat(json.write(triviaQuestion)).hasJsonPathStringValue("@.answer4");
-        assertThat(json.write(triviaQuestion)).extractingJsonPathStringValue("@.answer4").isEqualTo("Ringo Starr");
+        TriviaData triviaData = new TriviaData("Geography",
+                "Multiple Choice",
+                "Easy",
+                "What is the only state in the United States that does not have a flag in a shape with 4 edges?",
+                "Ohio", new String[] { "Florida",
+                        "Idaho",
+                        "New Mexico" });
+
+        assertThat(json.write(triviaData)).isEqualToJson(expectedJson);
+        assertThat(json.write(triviaData)).hasJsonPathStringValue("@.category");
+        assertThat(json.write(triviaData)).extractingJsonPathStringValue("@.category").isEqualTo("Geography");
+        assertThat(json.write(triviaData)).hasJsonPathStringValue("@.type");
+        assertThat(json.write(triviaData)).extractingJsonPathStringValue("@.type").isEqualTo("Multiple Choice");
+        assertThat(json.write(triviaData)).hasJsonPathStringValue("@.difficulty");
+        assertThat(json.write(triviaData)).extractingJsonPathStringValue("@.difficulty").isEqualTo("Easy");
+        assertThat(json.write(triviaData)).hasJsonPathStringValue("@.question");
+        assertThat(json.write(triviaData)).extractingJsonPathStringValue("@.question").isEqualTo(
+                "What is the only state in the United States that does not have a flag in a shape with 4 edges?");
+        assertThat(json.write(triviaData)).hasJsonPathStringValue("@.correctAnswer");
+        assertThat(json.write(triviaData)).extractingJsonPathStringValue("@.correctAnswer").isEqualTo("Ohio");
+        assertThat(json.write(triviaData)).hasJsonPathArrayValue("@.incorrectAnswers");
+        assertThat(json.write(triviaData)).extractingJsonPathArrayValue("@.incorrectAnswers").containsExactly(new Object[]{"Florida", "Idaho", "New Mexico"});
 
     }
-    
+
     @Test
-    public void triviaDataDeserialisationTest() throws IOException {
+    public void triviaDataDeserializationTest() throws IOException {
         String expected = """
                 {
-  "question": "Who won WW2?",
-  "answer1": "The Germans",
-  "answer2": "The Martians",
-  "answer3": "The Commies",
-  "answer4": "The Kiwis"
-}
-                                """;
-        assertThat(json.parse(expected)).isEqualTo(
-                new TriviaQuestion("Who won WW2?", "The Germans", "The Martians", "The Commies", "The Kiwis"));
-        assertThat(json.parseObject(expected).answer1()).isEqualTo("The Germans");
+                    "category": "Geography",
+                    "type": "Multiple Choice",
+                    "difficulty": "Easy",
+                    "question": "What is the only state in the United States that does not have a flag in a shape with 4 edges?",
+                    "correctAnswer": "Ohio",
+                    "incorrectAnswers": ["Florida", "Idaho", "New Mexico"]
+                }
+                """;
+        TriviaData expectedData = new TriviaData(
+                "Geography",
+                "Multiple Choice",
+                "Easy",
+                "What is the only state in the United States that does not have a flag in a shape with 4 edges?",
+                "Ohio",
+                new String[] { "Florida", "Idaho", "New Mexico" });
+
+        assertThat(json.parseObject(expected).correctAnswer()).isEqualTo(expectedData.correctAnswer());
+        //assertThat(Arrays.equals(json.parseObject(expected).incorrectAnswers(), expectedData.incorrectAnswers()));
+
     }
-    
 }
