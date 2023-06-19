@@ -6,6 +6,6 @@ public record TriviaData(
     String type,
     String difficulty,
     String question,
-    String correctAnswer,
-    String[] incorrectAnswers) {
+    String correct_answer,
+    String[] incorrect_answers) {
 }
